@@ -20,8 +20,8 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 /**
  * Symfony HttpFoundation component Provider for sessions.
@@ -70,12 +70,12 @@ class SessionServiceProvider implements ServiceProviderInterface
         $app['session.storage.save_path'] = null;
     }
 
-    public function onEarlyKernelRequest(GetResponseEvent $event)
+    public function onEarlyKernelRequest(RequestEvent $event)
     {
         $event->getRequest()->setSession($this->app['session']);
     }
 
-    public function onKernelRequest(GetResponseEvent $event)
+    public function onKernelRequest(RequestEvent $event)
     {
         if (HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
             return;
@@ -96,7 +96,7 @@ class SessionServiceProvider implements ServiceProviderInterface
         }
     }
 
-    public function onKernelResponse(FilterResponseEvent $event)
+    public function onKernelResponse(ResponseEvent $event)
     {
         if (HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
             return;

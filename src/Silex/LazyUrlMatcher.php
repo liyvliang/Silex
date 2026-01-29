@@ -46,7 +46,7 @@ class LazyUrlMatcher implements UrlMatcherInterface
     /**
      * {@inheritdoc}
      */
-    public function match($pathinfo)
+    public function match(string $pathinfo): array
     {
         return $this->getUrlMatcher()->match($pathinfo);
     }
@@ -62,7 +62,7 @@ class LazyUrlMatcher implements UrlMatcherInterface
     /**
      * {@inheritdoc}
      */
-    public function getContext()
+    public function getContext(): SymfonyRequestContext
     {
         return $this->getUrlMatcher()->getContext();
     }

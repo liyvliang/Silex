@@ -17,9 +17,9 @@ use Symfony\Component\HttpKernel\HttpKernel;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\TerminableInterface;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
-use Symfony\Component\HttpKernel\Event\PostResponseEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\HttpKernel\EventListener\ResponseListener;
 use Symfony\Component\HttpKernel\EventListener\RouterListener;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -330,7 +330,7 @@ class Application extends \Pimple implements HttpKernelInterface, TerminableInte
     {
         $app = $this;
 
-        $this->on(KernelEvents::REQUEST, function (GetResponseEvent $event) use ($callback, $app) {
+        $this->on(KernelEvents::REQUEST, function (RequestEvent $event) use ($callback, $app) {
             if (HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
                 return;
             }
@@ -356,7 +356,7 @@ class Application extends \Pimple implements HttpKernelInterface, TerminableInte
     {
         $app = $this;
 
-        $this->on(KernelEvents::RESPONSE, function (FilterResponseEvent $event) use ($callback, $app) {
+        $this->on(KernelEvents::RESPONSE, function (ResponseEvent $event) use ($callback, $app) {
             if (HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
                 return;
             }
@@ -383,7 +383,7 @@ class Application extends \Pimple implements HttpKernelInterface, TerminableInte
     {
         $app = $this;
 
-        $this->on(KernelEvents::TERMINATE, function (PostResponseEvent $event) use ($callback, $app) {
+        $this->on(KernelEvents::TERMINATE, function (TerminateEvent $event) use ($callback, $app) {
             call_user_func($app['callback_resolver']->resolveCallback($callback), $event->getRequest(), $event->getResponse(), $app);
         }, $priority);
     }
@@ -554,7 +554,7 @@ class Application extends \Pimple implements HttpKernelInterface, TerminableInte
      *
      * @param Request|null $request Request to process
      */
-    public function run(Request $request = null)
+    public function run(?Request $request = null)
     {
         if (null === $request) {
             $request = Request::createFromGlobals();
@@ -571,7 +571,7 @@ class Application extends \Pimple implements HttpKernelInterface, TerminableInte
      * If you call this method directly instead of run(), you must call the
      * terminate() method yourself if you want the finish filters to be run.
      */
-    public function handle(Request $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
+    public function handle(Request $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true): Response
     {
         if (!$this->booted) {
             $this->boot();

@@ -12,9 +12,9 @@
 namespace Silex\Tests\EventListener;
 
 use Silex\EventListener\LogListener;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
@@ -43,9 +43,9 @@ class LogListenerTest extends \PHPUnit_Framework_TestCase
 
         $kernel = $this->getMockBuilder('Symfony\\Component\\HttpKernel\\HttpKernelInterface')->getMock();
 
-        $dispatcher->dispatch(KernelEvents::REQUEST, new GetResponseEvent($kernel, Request::create('/subrequest'), HttpKernelInterface::SUB_REQUEST), 'Skip sub requests');
+        $dispatcher->dispatch(KernelEvents::REQUEST, new RequestEvent($kernel, Request::create('/subrequest'), HttpKernelInterface::SUB_REQUEST), 'Skip sub requests');
 
-        $dispatcher->dispatch(KernelEvents::REQUEST, new GetResponseEvent($kernel, Request::create('/foo'), HttpKernelInterface::MASTER_REQUEST), 'Log master requests');
+        $dispatcher->dispatch(KernelEvents::REQUEST, new RequestEvent($kernel, Request::create('/foo'), HttpKernelInterface::MASTER_REQUEST), 'Log master requests');
     }
 
     public function testResponseListener()
@@ -62,9 +62,9 @@ class LogListenerTest extends \PHPUnit_Framework_TestCase
 
         $kernel = $this->getMockBuilder('Symfony\\Component\\HttpKernel\\HttpKernelInterface')->getMock();
 
-        $dispatcher->dispatch(KernelEvents::RESPONSE, new FilterResponseEvent($kernel, Request::create('/foo'), HttpKernelInterface::SUB_REQUEST, Response::create('subrequest', 200)), 'Skip sub requests');
+        $dispatcher->dispatch(KernelEvents::RESPONSE, new ResponseEvent($kernel, Request::create('/foo'), HttpKernelInterface::SUB_REQUEST, Response::create('subrequest', 200)), 'Skip sub requests');
 
-        $dispatcher->dispatch(KernelEvents::RESPONSE, new FilterResponseEvent($kernel, Request::create('/foo'), HttpKernelInterface::MASTER_REQUEST, Response::create('bar', 301)), 'Log master requests');
+        $dispatcher->dispatch(KernelEvents::RESPONSE, new ResponseEvent($kernel, Request::create('/foo'), HttpKernelInterface::MASTER_REQUEST, Response::create('bar', 301)), 'Log master requests');
     }
 
     public function testExceptionListener()
@@ -87,8 +87,8 @@ class LogListenerTest extends \PHPUnit_Framework_TestCase
 
         $kernel = $this->getMockBuilder('Symfony\\Component\\HttpKernel\\HttpKernelInterface')->getMock();
 
-        $dispatcher->dispatch(KernelEvents::EXCEPTION, new GetResponseForExceptionEvent($kernel, Request::create('/foo'), HttpKernelInterface::SUB_REQUEST, new \RuntimeException('Fatal error')));
+        $dispatcher->dispatch(KernelEvents::EXCEPTION, new ExceptionEvent($kernel, Request::create('/foo'), HttpKernelInterface::SUB_REQUEST, new \RuntimeException('Fatal error')));
 
-        $dispatcher->dispatch(KernelEvents::EXCEPTION, new GetResponseForExceptionEvent($kernel, Request::create('/foo'), HttpKernelInterface::SUB_REQUEST, new HttpException(400, 'Http error')));
+        $dispatcher->dispatch(KernelEvents::EXCEPTION, new ExceptionEvent($kernel, Request::create('/foo'), HttpKernelInterface::SUB_REQUEST, new HttpException(400, 'Http error')));
     }
 }

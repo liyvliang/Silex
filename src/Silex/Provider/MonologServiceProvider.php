@@ -31,15 +31,7 @@ class MonologServiceProvider implements ServiceProviderInterface
             return $app['monolog'];
         };
 
-        if ($bridge = class_exists('Symfony\Bridge\Monolog\Logger')) {
-            $app['monolog.handler.debug'] = function () use ($app) {
-                $level = MonologServiceProvider::translateLevel($app['monolog.level']);
-
-                return new DebugHandler($level);
-            };
-        }
-
-        $app['monolog.logger.class'] = $bridge ? 'Symfony\Bridge\Monolog\Logger' : 'Monolog\Logger';
+        $app['monolog.logger.class'] = 'Monolog\Logger';
 
         $app['monolog'] = $app->share(function ($app) {
             $log = new $app['monolog.logger.class']($app['monolog.name']);

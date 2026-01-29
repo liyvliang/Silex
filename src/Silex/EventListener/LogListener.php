@@ -14,9 +14,9 @@ namespace Silex\EventListener;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,9 +38,9 @@ class LogListener implements EventSubscriberInterface
     /**
      * Logs master requests on event KernelEvents::REQUEST.
      *
-     * @param GetResponseEvent $event
+     * @param RequestEvent $event
      */
-    public function onKernelRequest(GetResponseEvent $event)
+    public function onKernelRequest(RequestEvent $event)
     {
         if (HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
             return;
@@ -52,9 +52,9 @@ class LogListener implements EventSubscriberInterface
     /**
      * Logs master response on event KernelEvents::RESPONSE.
      *
-     * @param FilterResponseEvent $event
+     * @param ResponseEvent $event
      */
-    public function onKernelResponse(FilterResponseEvent $event)
+    public function onKernelResponse(ResponseEvent $event)
     {
         if (HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
             return;
@@ -66,11 +66,18 @@ class LogListener implements EventSubscriberInterface
     /**
      * Logs uncaught exceptions on event KernelEvents::EXCEPTION.
      *
-     * @param GetResponseForExceptionEvent $event
+     * @param ExceptionEvent $event
      */
-    public function onKernelException(GetResponseForExceptionEvent $event)
+    public function onKernelException(ExceptionEvent $event)
     {
-        $this->logException($event->getException());
+        $throwable = $event->getThrowable();
+        if ($throwable instanceof \Exception) {
+            $exception = $throwable;
+        } else {
+            $exception = new \Exception($throwable->getMessage(), (int)$throwable->getCode(), $throwable);
+        }
+
+        $this->logException($exception);
     }
 
     /**
