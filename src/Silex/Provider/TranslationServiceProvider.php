@@ -14,7 +14,6 @@ namespace Silex\Provider;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
 use Silex\Translator;
-use Symfony\Component\Translation\MessageSelector;
 use Symfony\Component\Translation\Loader\ArrayLoader;
 use Symfony\Component\Translation\Loader\XliffFileLoader;
 
@@ -74,9 +73,7 @@ class TranslationServiceProvider implements ServiceProviderInterface
             return array();
         };
 
-        $app['translator.message_selector'] = $app->share(function () {
-            return new MessageSelector();
-        });
+        $app['translator.message_selector'] = null;
 
         $app['translator.domains'] = array();
         $app['locale_fallbacks'] = array('en');

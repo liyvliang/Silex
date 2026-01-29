@@ -11,8 +11,8 @@
 
 namespace Silex;
 
+use Symfony\Component\Translation\Formatter\MessageFormatterInterface;
 use Symfony\Component\Translation\Translator as BaseTranslator;
-use Symfony\Component\Translation\MessageSelector;
 
 /**
  * Translator that gets the current locale from the Silex application.
@@ -23,19 +23,19 @@ class Translator extends BaseTranslator
 {
     protected $app;
 
-    public function __construct(Application $app, MessageSelector $selector, $cacheDir = null, $debug = false)
+    public function __construct(Application $app, ?MessageFormatterInterface $formatter = null, ?string $cacheDir = null, bool $debug = false)
     {
         $this->app = $app;
 
-        parent::__construct(null, $selector, $cacheDir, $debug);
+        parent::__construct($this->app['locale'], $formatter, $cacheDir, $debug);
     }
 
-    public function getLocale()
+    public function getLocale(): string
     {
         return $this->app['locale'];
     }
 
-    public function setLocale($locale)
+    public function setLocale(string $locale)
     {
         if (null === $locale) {
             return;
