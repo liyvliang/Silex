@@ -60,7 +60,8 @@ class ExceptionHandler implements EventSubscriberInterface
             $exception = FlattenException::create($exception);
         }
 
-        $response = Response::create($handler->getBody($exception), $exception->getStatusCode(), $exception->getHeaders())->setCharset(ini_get('default_charset'));
+        $response = (new Response($handler->getBody($exception), $exception->getStatusCode(), $exception->getHeaders()))
+            ->setCharset(ini_get('default_charset'));
         $event->setResponse($response);
     }
 
