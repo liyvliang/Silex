@@ -123,6 +123,10 @@ class Application extends \Pimple implements HttpKernelInterface, TerminableInte
             return new ControllerResolver($app, $app['logger']);
         });
 
+        $this['argument_resolver'] = $this->share(function () use ($app) {
+            return new ControllerArgumentResolver($app, $app['logger']);
+        });
+
         $this['kernel'] = $this->share(function () use ($app) {
             return new HttpKernel($app['dispatcher'], $app['resolver'], $app['request_stack']);
         });
